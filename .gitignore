@@ -1,0 +1,27 @@
+# Obsidian
+.obsidian/workspace
+.obsidian/workspace.json
+.obsidian/workspace.jsonc
+.obsidian/cache
+.obsidian/plugins/dataview/data.json
+.obsidian/plugins/templater
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# State
+.watcher_state.json
+
+# Private conversation data
+Input/
+Daily/
+Models/

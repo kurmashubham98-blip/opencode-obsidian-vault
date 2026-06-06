@@ -1,0 +1,9 @@
+graph
+    model1[<b>model 1</b>] --> chat1("Chat 1 (llamaparse)") & c2("Chat 2 (slack usage)") & c3(...)
+    chat1 --> summary1["Summary Node"]
+    model1 --> summary1
+    c2 --> summary1
+    style model1 fill:#242424,stroke:#fff,stroke-width:2px
+    style chat1 fill:#33b5e5,color:#000
+    style c2 fill:#f0f0f0,color:#000
+    style summary1 fill:#333,stroke:#f1c40f,stroke-dasharray: 5 5

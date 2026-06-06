@@ -1,0 +1,17 @@
+{
+	"nodes":[
+		{"id":"you-are-here","type":"file","file":"00 YOU ARE HERE.md","x":0,"y":0,"width":400,"height":200},
+		{"id":"models-index","type":"file","file":"Models/Models Index.md","x":-500,"y":-300,"width":400,"height":200},
+		{"id":"gpt-4o","type":"file","file":"Models/GPT-4o.md","x":500,"y":-500,"width":300,"height":150},
+		{"id":"claude","type":"file","file":"Models/Claude 3.5 Sonnet.md","x":500,"y":-200,"width":300,"height":150},
+		{"id":"llama","type":"file","file":"Models/Llama 3.md","x":500,"y":100,"width":300,"height":150},
+		{"id":"kimi","type":"file","file":"Models/Kimi k2.6.md","x":500,"y":400,"width":300,"height":150}
+	],
+	"edges":[
+		{"fromNode":"you-are-here","fromSide":"left","toNode":"models-index","toSide":"right"},
+		{"fromNode":"models-index","fromSide":"top","toNode":"gpt-4o","toSide":"left"},
+		{"fromNode":"models-index","fromSide":"right","toNode":"claude","toSide":"left"},
+		{"fromNode":"models-index","fromSide":"bottom","toNode":"llama","toSide":"left"},
+		{"fromNode":"models-index","fromSide":"bottom","toNode":"kimi","toSide":"left"}
+	]
+}
