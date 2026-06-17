@@ -1,37 +1,37 @@
 # OpenCode Obsidian Vault
 
-Auto-save every OpenCode conversation into an Obsidian vault with full context — messages, tool calls, tokens, costs — and visualize everything in Obsidian's Graph View.
+Auto-save every OpenCode and Gemini CLI conversation into an Obsidian vault with full context — messages, tool calls, tokens, costs — and visualize everything in Obsidian's Graph View.
 
 ## How It Works
 
-1. A **watcher** (`watcher.py`) monitors OpenCode sessions in the background
-2. When a session ends, it exports the full conversation
-3. Saves it as a clean markdown file in `Input/` with proper frontmatter
-4. Creates/updates model profiles in `Models/`
-5. Everything links with `[[wikilinks]]` — Obsidian's Graph View shows connections
+- **`watcher.py`** — background daemon that monitors both OpenCode and Gemini CLI sessions
+- **`save-session.py`** — export an OpenCode session to the vault
+- **`save-gemini.py`** — export Gemini CLI conversations to the vault
+- Saves as clean markdown in `Input/` with frontmatter (model, provider, tokens)
+- Creates/updates model profiles in `Models/`
+- Everything uses `[[wikilinks]]` — Obsidian's Graph View shows connections
 
 ## Quick Start
 
 ```bash
-# 1. Clone anywhere
 git clone https://github.com/kurmashubham98-blip/opencode-obsidian-vault.git
+cd opencode-obsidian-vault
 
-# 2. Open in Obsidian
-#    File → Open Vault → Open folder as vault → select the cloned folder
+# Open in Obsidian: File → Open Vault → Open folder as vault → select this folder
 
-# 3. Start the auto-save watcher
+# Start the watcher (auto-saves both OpenCode and Gemini sessions)
 python3 watcher.py
 ```
 
-Or use the alias (add to `~/.bashrc`):
+Or run manually:
 ```bash
-alias oc='opencode; python3 /path/to/cloned/folder/save-session.py'
+python3 save-session.py          # save latest OpenCode session
+python3 save-gemini.py           # save all Gemini CLI conversations
 ```
 
-## systemd Auto-Start (Linux)
+## Auto-Start with systemd (Linux)
 
 ```bash
-# Edit the .service file to point to your cloned path first
 cp opencode-vault-watcher.service ~/.config/systemd/user/
 systemctl --user daemon-reload
 systemctl --user enable --now opencode-vault-watcher.service
