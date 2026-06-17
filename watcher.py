@@ -13,6 +13,8 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+GEMINI_DIR = Path(os.path.expanduser("~/.gemini/tmp"))
+
 VAULT = Path(__file__).parent.resolve()
 INPUT_DIR = VAULT / "Input"
 MODELS_DIR = VAULT / "Models"
@@ -151,6 +153,44 @@ def export_and_save(session_id: str):
             f.write(f"\n- [[{filename}]]\n")
 
 
+def check_gemini(state: dict):
+    """Check for new Gemini CLI sessions and save them."""
+    if not GEMINI_DIR.exists():
+        return
+    key = "gemini_mtimes"
+    if key not in state:
+        state[key] = {}
+    for logs_file in GEMINI_DIR.rglob("chats/*.jsonl"):
+        try:
+            mtime = logs_file.stat().st_mtime
+            fpath = str(logs_file)
+            last = state[key].get(fpath, 0)
+            if mtime > last:
+                state[key][fpath] = mtime
+                sid = logs_file.stem
+                if already_saved(sid):
+                    continue
+                state["gemini_pending"] = state.get("gemini_pending", {})
+                if fpath not in state.get("gemini_pending", {}):
+                    state["gemini_pending"][fpath] = time.time() + 30
+        except OSError:
+            continue
+
+    pending = state.get("gemini_pending", {})
+    for fpath, t in list(pending.items()):
+        if time.time() > t:
+            sid = Path(fpath).stem
+            if already_saved(sid):
+                pending.pop(fpath, None)
+                continue
+            print(f"  Saving Gemini session: {sid[:20]}...", flush=True)
+            subprocess.run(
+                [sys.executable, str(VAULT / "save-gemini.py"), "--force"],
+                capture_output=True, timeout=60,
+            )
+            pending.pop(fpath, None)
+
+
 def main():
     state = {"last_id": "", "saved_ids": set()}
     if STATE_FILE.exists():
@@ -158,6 +198,7 @@ def main():
             d = json.loads(STATE_FILE.read_text())
             state["last_id"] = d.get("last_id", "")
             state["saved_ids"] = set(d.get("saved_ids", []))
+            state["gemini_mtimes"] = d.get("gemini_mtimes", {})
         except Exception:
             pass
 
@@ -170,21 +211,23 @@ def main():
             latest = get_latest_session()
             if latest:
                 sid = latest["id"]
-                # If session changed and it's not saved yet
                 if sid != state["last_id"]:
                     print(f"  Detected session change: {sid[:20]}...", flush=True)
                     state["last_id"] = sid
-                    cooldown_until = time.time() + 30  # wait 30s for session to finish
+                    cooldown_until = time.time() + 30
 
-                # Save after cooldown if not already saved
                 if sid not in state["saved_ids"] and time.time() > cooldown_until:
                     print(f"  Saving session: {sid[:20]}...", flush=True)
                     export_and_save(sid)
                     state["saved_ids"].add(sid)
-                    STATE_FILE.write_text(json.dumps({
-                        "last_id": state["last_id"],
-                        "saved_ids": list(state["saved_ids"]),
-                    }))
+
+            check_gemini(state)
+
+            STATE_FILE.write_text(json.dumps({
+                "last_id": state["last_id"],
+                "saved_ids": list(state["saved_ids"]),
+                "gemini_mtimes": state.get("gemini_mtimes", {}),
+            }))
 
             time.sleep(10)
         except KeyboardInterrupt:

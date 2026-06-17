@@ -197,7 +197,6 @@ def save_session(session: dict):
 
 
 def main():
-    force = "--force" in sys.argv
     sessions = get_all_sessions()
     for s in sessions:
         parsed = parse_session(s["path"])
